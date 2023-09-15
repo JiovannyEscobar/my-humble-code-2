@@ -2,21 +2,14 @@ import tkinter as tk
 import time
 #from recorder import test
 
-from testarea3 import *
-import testarea
+#import testarea
+import recorder
+import transcribe
+
+from threading import Event
 
 
-y = "Hello world"
-c = 0
-
-timestart = 0
-curtime = 0
-clix = 0
-
-a = 0
-n = 1.0
-
-'''
+"""
 Certainly! Here are three colors in hex code that would be visually appealing for a website:
 
 Teal: #1CA2A8
@@ -36,7 +29,16 @@ chatgpt haha lol
 #343640 dark right side
 #fae69e yellow in new
 #fae69e green logo
-'''
+"""
+
+m = 0
+
+
+
+    
+    #else:
+    #    i = 0
+    #    setTextBox()
 
     
 root = tk.Tk()
@@ -66,37 +68,9 @@ print("set")
 label.pack(pady=12, padx=100)
 label.configure()
 
-
-def test(txt):
-    
-    global n
-    
-    if n > 4:
-        return
-    testarea.count()
-    a = float(txtArea.index('end-1c').split('.')[0])  # returns line count 2 
-    print("Hello world!")
-    txtArea.insert(n, bb)
-    n+=1
-
-def test2(txt):
-    global n
-
-    txtArea.insert(n, txt)
-
-def test3():
-    global bb
-
-    testarea.count()
-    test2(bb)
-    time.sleep(1.0)
-
 #button = tkinter.Button(master=frame, text="Test", command=lambda: inp([10])) # why its play before pressing button? lamba is fix :)
-button = tk.Button(btnframe, text="Test", command=test3, bg='#202123', fg="white")
-button.pack(pady=12, padx=10)
-
-
+runButton = tk.Button(btnframe, text="Test", command=transcribe.setTextBox, bg='#202123', fg="white")
+runButton.pack(pady=12, padx=10)
 
 
 root.mainloop()
-

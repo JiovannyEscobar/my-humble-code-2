@@ -12,6 +12,7 @@ import numpy as py
 import multiprocessing
 from multiprocessing import Process
 import time
+
  
 
 
@@ -36,8 +37,11 @@ Program Flow
 start_time = time.time()
 n = 0
 m = 0
-trans_arr = [0]
+trans_arr = [0] #which recording to transcribe
 stp = 0
+str_arr = [0]
+
+
 
 def inp(durnum_arr):
 
@@ -65,11 +69,11 @@ def record(durnum_arr, trans_arr):
 
     #while time.time() - start_time < durnum_arr[0]:
 
-    while stp < 5:
+    while stp < 2:
 
         stp+=1
         
-        # Keep track of clips
+        # Keep track of seconds
         rd = round(time.time() - start_time)
         rectimes = "Recording started. " + str(rd)
         print(rectimes)
@@ -93,15 +97,15 @@ def record(durnum_arr, trans_arr):
         n = n + 1
 
 
-
-
     finalrd = round(time.time() - start_time)
     print ("Session Finished. Recorded for " + str(finalrd) + " seconds. ") # str(durnum) so its exact for user hehe even though its not the real thing i think hehe
 
+
 def transcribe(trans_arr): 
 
-    global m
+    global m, str_arr
 
+    #model used
     model = whisper.load_model("base")
     print ("Transcription On")
 
@@ -119,12 +123,18 @@ def transcribe(trans_arr):
             txt.write(result["text"])
             txt.write("\n")      
             print ("Transcribed " + str(m) + " ------- " + result["text"] + " --------")
-            
+            str_arr[m] = result["text"]       
         
         if m == trans_arr[0]:
                 print ("Transcription Complete. Transcribed recording " + str(m) + ". Final trans_arr is " + str(trans_arr[0]))
                 exit()
+        
         m = m + 1
+        
+    #return str(result["text"])
+
+        
+        
 
 
 
@@ -152,5 +162,5 @@ def transcribe(trans_arr):
 
 
 #inp([0])
-#record()
+#record([0],[0])
 #transcribe([0])
