@@ -1,166 +1,92 @@
-#import warnings
-#from numba import NumbaDeprecationWarning
-#warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
-# This removes the NumbaDepWarning. The latest version of numba is still 57.1. 59 is not out yet, so i think this is 
-# the best u can do. to remove it. its just in the log though, not in the gui
+#RECORDER
+# note: all references to transcription should be moved first. w8 sht that means theres a lot of stuff 2 code
+# fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuckkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
 
-import os
-import sounddevice as sd
-import soundfile as sf
-import whisper
-import numpy as py
-import multiprocessing
-from multiprocessing import Process
-import time
-
- 
+# IMPORTS
+import pyaudio  # Handles portaudio interface for Python. Allows access to microphone i think
+import wave  # Allows writing of .wav files
+import keyboard  # Read keyboard inputs in dev console. Only used for testing
+import os  # Allows access to files and filepaths
+import Transcriber  # move this shit later. smth smth recursive import
 
 
-# Set the duration per clip
-duration = 3  # Recording duration in seconds
-
-# Set sampling freq for mic to record
-sampling_frequency = 44100  # Sample rate (Hz)
-
-# Create the "recordings" folder if it doesn't exist
-folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "recordings")
-os.makedirs(folder_path, exist_ok=True)
-
-'''''
-Program Flow
-- create recordings folder
-- inp() allows for user to input in secs how long to rec.
-- record() opens mic; records in clips of 3 seconds or as set above
-- transcribe() transcribes finished clips and writes transcribed text in transcript.txt 
-'''''
-
-start_time = time.time()
-n = 0
-m = 0
-trans_arr = [0] #which recording to transcribe
-stp = 0
-str_arr = [0]
+# DEFAULTS (AUDIO RECORDING)
+chunk = 1024  # i dont really understand this one - i think it determines how the mic input is split in the wav file?
+sampleFormat = pyaudio.paInt16  # Recording format for audio
+channels = 1  # Audio channels. 1 is mono, 2 is stereo. 1 is easier/more compatible w/ Whisper i think
+sampleRate = 16000  # Audio sample rate. x bits per sec (i think)
+seconds = 3  # How many seconds per audio clip
+filename = "output"  # Will save audio into "filename" + n + ".wav"
+folder = "recordings"
+filedir = os.path.join(os.getcwd(), folder)  # Will save audio into local subdirectory
+clipNo = 0  # Counts how many clips have been recorded so far
+delAmt = 4  # Delete every x files, if savePrevFiles = False
 
 
+def setup():
+    # Creating recordings folder if unavailable
+    if not os.path.isdir(filedir):
+        os.mkdir(filedir)
 
-def inp(durnum_arr):
+    # Deleting previous recordings, if any. Deletes .wav files only
+    if len(os.listdir(filedir)) > 0:
+        print("Deleting previous recordings...")
+        for file in os.listdir(filedir):
+            x = 0
+            if len(file) > 4:
+                x = len(file) - 4
+            
+            if file[x:len(file)] == ".wav":
+                os.remove(os.path.join(filedir, file))
 
-    # Length of operation in seconds
-    durnum = int(input("How long are you going to record? "))
-    durnum_arr[0] = durnum 
-    trans_arr[0] = durnum
 
-    print("Will record for " + str(durnum) + " seconds.")
+def record(savePrevFiles = False):
+    p = pyaudio.PyAudio()  # Open portaudio interface
+    global clipNo
 
+    print("Activating audio input stream... (Press space to deactivate in console/testing mode)")
+    stream = p.open(rate=sampleRate, channels=channels, format=sampleFormat, input=True)
 
-def record(durnum_arr, trans_arr):
+    # Recording proper
+    print("Starting recording...")
+    while True:  # Allows infinite recording until interrupted
+        for i in range (sampleRate // chunk * seconds):  # Records until x seconds pass
+            if i == 0:  # Creating a new wave file. Only runs at beginning of recording every x seconds
+                wf = wave.open(os.path.join(filedir, filename+str(clipNo)+".wav"), 'wb')
+                wf.setnchannels(channels)
+                wf.setsampwidth(p.get_sample_size(sampleFormat))  # Setting amt. of bits for audio file (resolution)
+                wf.setframerate(sampleRate)
+                clipNo += 1
+            wf.writeframes(stream.read(chunk))  # Saving of audio input into wav file
+
+            if keyboard.is_pressed("space"):
+                break
+        
+        Transcriber.start_transcribe(os.path.join(filedir, filename+str(clipNo-1)+".wav"))  # move this crap later
+
+        # Deleting prev files; leaves one file just to be safe (errors may happen here btw; look into it later)
+        # always leaves prev recorded file to allow Transcriber to finish transcribing it
+        if clipNo > 1 and (clipNo-1) % delAmt == 0 and not savePrevFiles:  
+            todel = []
+            for i in range(2, delAmt+2):
+                todel.append(filename+str(clipNo-i)+".wav")
+            for rec in os.listdir(filedir):
+                if rec in todel:
+                    os.remove(os.path.join(filedir, rec))
+        
+        if keyboard.is_pressed("space"):
+            break
     
-    # Delete previous recording files
-    files = os.listdir(folder_path)
-    for file in files:	
-        file_path = os.path.join(folder_path, file)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-    print("Previous recordings deleted.")
-    print("Will run for " + str(durnum_arr[0]) + " seconds" )  
+    print("Stream closed.")
+    stream.close()
+    p.terminate()
+
+    return
 
 
-    global n, stp
+if __name__ == "__main__":
+    Transcriber.load_model() 
 
-    #while time.time() - start_time < durnum_arr[0]:
+    setup()
+    record()
 
-    while stp < 2:
-
-        stp+=1
-        
-        # Keep track of seconds
-        rd = round(time.time() - start_time)
-        rectimes = "Recording started. " + str(rd)
-        print(rectimes)
-        
-        # Record audio from the microphone
-        recording = sd.rec(int(duration * sampling_frequency),
-                        samplerate = sampling_frequency, channels=1)  # Mono recording
-
-        # Wait for the recording to complete
-        sd.wait()
-
-        # Save the recording to a WAV file in the "recordings" folder
-        filename = "recording" + str(n) + ".wav"
-
-        output_file = os.path.join(folder_path, filename)
-        sf.write(output_file, recording, sampling_frequency)
-
-        print(f"Recording saved as {output_file}.")
-
-        trans_arr[0] = n
-        n = n + 1
-
-
-    finalrd = round(time.time() - start_time)
-    print ("Session Finished. Recorded for " + str(finalrd) + " seconds. ") # str(durnum) so its exact for user hehe even though its not the real thing i think hehe
-
-
-def transcribe(trans_arr): 
-
-    global m, str_arr
-
-    #model used
-    model = whisper.load_model("base")
-    print ("Transcription On")
-
-    while True:        
-        #retrieve file
-        getfile = "recordings/recording"+ str(m) + ".wav"
-          
-        print ("Transcribing " + str(m) + "...")
-
-        #transcribe file whisper
-        result = model.transcribe(getfile)
-
-        #transcribe file as text
-        with open("transcriptions/transcript.txt", "a", encoding="utf-8") as txt:
-            txt.write(result["text"])
-            txt.write("\n")      
-            print ("Transcribed " + str(m) + " ------- " + result["text"] + " --------")
-            str_arr[m] = result["text"]       
-        
-        if m == trans_arr[0]:
-                print ("Transcription Complete. Transcribed recording " + str(m) + ". Final trans_arr is " + str(trans_arr[0]))
-                exit()
-        
-        m = m + 1
-        
-    #return str(result["text"])
-
-        
-        
-
-
-
-     
-                
-
-#if __name__=='__main__':
-
-    # For transcribe() to work until the last recording
-    trans_arr = multiprocessing.Array("i", 1)
-
-    # Timer in seconds for recording
-    durnum_arr = multiprocessing.Array('i', 1) 
-    
-    p1 = multiprocessing.Process(target=record, args=(durnum_arr, trans_arr,))
-    p2 = multiprocessing.Process(target=transcribe, args=(trans_arr,))
-    
-    inp(durnum_arr)
-
-    p1.start()
-    p2.start()
-
-    p1.join()
-    p2.join()
-
-
-#inp([0])
-#record([0],[0])
-#transcribe([0])
