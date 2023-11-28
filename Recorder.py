@@ -63,7 +63,9 @@ def record(savePrevFiles = False):
             if keyboard.is_pressed("space"):
                 break
         
-        Transcriber.start_transcribe(os.path.join(filedir, filename+str(clipNo-1)+".wav"))  # move this crap later
+        # Transcriber.start_transcribe(os.path.join(filedir, filename+str(clipNo-1)+".wav"))  # move this crap later
+
+        yield os.path.join(filedir, filename+str(clipNo-1)+".wav")
 
         # Deleting prev files; leaves one file just to be safe (errors may happen here btw; look into it later)
         if clipNo > 1 and (clipNo-1) % delAmt == 0 and not savePrevFiles:  

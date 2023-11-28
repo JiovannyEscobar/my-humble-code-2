@@ -3,7 +3,9 @@ Hello my friends.
 
 # whisper transcriber software
 
-## PATCH NOTES VER 4 (PYAUDIO VERSION)
+## PATCH NOTES VER 4.1 (PYAUDIO VERSION)
+- added multiple active models in Transcriber
+
 - recorder basic functionality implemented
 - transcriber basic functionality implemented
 - using pyaudio as audio handling module

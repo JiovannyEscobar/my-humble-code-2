@@ -6,8 +6,9 @@ import Transcriber
 Transcriber.load_model()
 Recorder.setup()
 function = Recorder.record()
-while True:
+while True: 
     try:
-        print(function.__next__())
+        Transcriber.start_transcribe(function.__next__())
     except:
         break
+    
