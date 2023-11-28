@@ -24,6 +24,17 @@ Hello my friends.
     - clip cutting speech affects accuracy
 - works
 
+### COMMENTS ON PATCH NOTES VER 4 (PYAUDIO VERSION)
+
+Great work my friend.
+
+    Let's not do VAD
+    It's fine if it is not accurate, so no need to combine (let's see first how inaccurate actually)
+    Let's not do subtitling function (for now)
+    Let's not do voice commands (Unless you like). Have a button to stop start and stop stuff.
+
+If you have any more questions or need further assistance with anything, feel free to ask. Happy coding!
+
 ## DEPENDENCIES
 You must have Whisper AI working first.
 See this video.
