@@ -36,6 +36,15 @@ Great work my friend.
 If you have any more questions or need further assistance with anything, feel free to ask. Happy coding!
 
 ## DEPENDENCIES
+### List
+pls update with any new modules
+1. Whisper AI
+2. Pytorch
+3. Pyaudio
+4. Wave(?)
+5. Tkinterdnd2(?)
+
+### Installation & Reference code
 You must have Whisper AI working first.
 See this video.
 https://www.youtube.com/watch?v=ABFqbY_rmEk&ab_channel=KevinStratvert
