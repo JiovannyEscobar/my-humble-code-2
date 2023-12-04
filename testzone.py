@@ -2,6 +2,9 @@ import os
 import wave
 import numpy
 from faster_whisper import WhisperModel
+from threading import Thread
+import datetime
+import time
 
 def convwavtoarr(filepath):
     wav = wave.open("recordings/output16.wav")
@@ -15,13 +18,32 @@ def convwavtoarr(filepath):
     audionormalized = audioasnpfl32/max_int16
     print(audionormalized)
 
-
+"""
 # FASTERWHISPER TESTING
-model = WhisperModel("small", device="cpu", compute_type="float16")
-segments, _ = model.transcribe("recordings/output16.wav", beam_size=5)
-segments = list(segments)
-print(segments)
+model = WhisperModel("medium.en", device="cpu")
+def transcribe(filepath):
+    segments, _ = model.transcribe(filepath, beam_size=5)
+    segments = list(segments)
+    print(filepath, segments)
 
+
+def s_t(filepath):
+    t = Thread(target=transcribe, args=(filepath, ))
+
+    t.start()"""
+
+"""global transcriptPath
+transcriptPath = "transcriptions/"+str(datetime.date.today())+"-"+str(int(time.time()))+".txt"
+
+def write():
+    with open(transcriptPath, "a", encoding="utf-8") as txt:
+        txt.write("Hello world")
+
+write()"""
+
+with open("transcriptions/2023-12-03-1701542236.txt") as f:
+    lines = f.readlines()
+print(lines)
 
 """# HUGGINGFACE TESTING
 import wave  

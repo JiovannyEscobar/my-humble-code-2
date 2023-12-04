@@ -2,10 +2,37 @@
 Hello my friends. 
 
 # whisper transcriber software
+run gui.py to see app
+run main.py for console mode (currently nonfunctional)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-## PATCH NOTES VER 4.1 (PYAUDIO VERSION)
+## PATCH NOTES VER 4.1.1 (PYAUDIO VERSION)
 - added multiple active models in Transcriber
+- GUI now (partly) functional
+- can change model size and language through GUI
+- can start recording and transcription through GUI
 
+### ISSUES
+also in [here](https://github.com/JiovannyEscobar/my-humble-code-2/issues)
+- currently can't display transcription in text box
+    - needs to transcribe only when transcription of a file is done, not all the time (for efficiency)
+- there is no fili model actually? just left lang as blank when fili is selected, meaning it may transcribe in other languages?
+- drag&drop not yet implemented; will require a LOT more coding
+    - split drag&dropped audio into 30sec intervals
+    - preprocess intervals (samplerate, audio resolution, etc)
+    - transcribe intervals
+- i feel like code is now spaghetti bc i didnt add events and other stuff
+- doesn't output transcript DURING recording, usually does it AFTER stop recording is pressed now
+    - idk why ????!
+- closing window doesn't stop app
+- stop button automatically stops entire program without final update of output textbox
+- gui needs to update during live transcription
+    - no indicator of model loading
+    - model customization still accessible during live transcription (may result in ![your computer blowing up](https://img.freepik.com/premium-psd/nuclear-bomb-explosion-isolated-transparent-background_879541-787.jpg?w=2000))
+- other stuff i forgot lol
+![me when coding](https://static-00.iconduck.com/assets.00/loudly-crying-face-emoji-1013x1024-xg3rnr6e.png)
+
+### V4.0
 - recorder basic functionality implemented
 - transcriber basic functionality implemented
 - using pyaudio as audio handling module
@@ -26,7 +53,7 @@ Hello my friends.
     - clip cutting speech affects accuracy
 - works
 
-### COMMENTS ON PATCH NOTES VER 4 (PYAUDIO VERSION)
+### COMMENTS ON PATCH NOTES VER 4
 
 Great work my friend.
 

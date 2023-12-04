@@ -1,51 +1,62 @@
-# TRANSCRIBER
+# TRANSCRIBER - Made for the Whisper Transcription Desktop Research
+# Written by geebees
 
 # IMPORTS
 import whisper
-from threading import Thread
+from threading import Thread, Event
 import torch
 import os
-import time  # For testing only
+import time
+import datetime
 
 
 # TRANSCRIPTION DEFAULTS
 global models
 models = []
 _device = "cpu"
-
-
-if torch.cuda.is_available():  # Pytorch w/ cuda support is available; uses gpu
-    print("Loading Transcribe using GPU...")
-    _device = "cuda"
-else:
-    print("Loading Transcribe using CPU...")
+global transcriptPath
+transcriptPath = "transcriptions/"+str(datetime.date.today())+"-"+str(int(time.time()))+".txt"
+global transcriptStartTime
+transcriptStartTime = None
+transcriptIsDone = Event()
 
 
 def load_model(amt=4, size="small", lang="en"):  # me <3 small.en
     """HOW TO FIX BATCH MISMATCH ERROR THING? theoretically, load multiple models at once, alternate between"""
-    modelname = size+"."+lang
+    if torch.cuda.is_available():  # Pytorch w/ cuda support is available; uses gpu
+        print("Loading Transcribe using GPU...")
+        _device = "cuda"
+    else:
+        print("Loading Transcribe using CPU...")
+
+    if lang != "":
+        lang = "." + lang
+    modelname = size+lang
 
     print("Loading", amt, "model/s of Whisper AI ("+modelname+")")
-    try:
-        for i in range(amt):
-            models.append([whisper.load_model(modelname, device=_device), False])
-    except:
-        print("Unrecognized model. Pls fix")
-        quit()
+    for i in range(amt):
+        models.append([whisper.load_model(modelname, device=_device), False])
+        print("loaded", modelname, "model #", i)
 
 
 def transcribe(filepath, m, verbose=True):
     model = models[m][0]
 
     if verbose:
-        print("Transcribing", filepath, "with model #", m)
+        print("Transcribing", filepath, "with model #", m, "to file", transcriptPath)
     try:
         transcription = model.transcribe(filepath)
         print(filepath, transcription["text"])
+
+        # Write to file
+        with open(transcriptPath, mode="a", encoding="utf-8") as txt:
+            txt.write(transcription["text"]+"\n")
     except:
-        print("Error in transcribing", filepath, "; this may be caused by simultaneous transcription, and idk how"
-              " to fix that issue yet")
+        # print("Error in transcribing", filepath, "; this may be caused by simultaneous transcription, and idk how"
+        #       " to fix that issue yet")
+        raise RuntimeError
     models[m][1] = False
+    # transcriptIsDone.set()
     return
 
 
@@ -59,8 +70,9 @@ def start_transcribe(filepath, waitEachFile = False):  # allows multithreading. 
             model[1] = True
             break
         if models.index(model) == len(models)-1:
+            # currently just warns you and doesn't do anything else
             print("Models all busy! Transcription cannot be done. Shutting down program...")
-            quit()
+            m = 0
 
     t = Thread(target=transcribe, args=(filepath, m, ))
 

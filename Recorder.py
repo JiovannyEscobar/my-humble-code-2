@@ -1,13 +1,13 @@
-#RECORDER
-# note: all references to transcription should be moved first. w8 sht that means theres a lot of stuff 2 code
-# fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuckkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+# RECORDER - Made for the Whisper Transcription Desktop Research
+# Written by geebees
 
 # IMPORTS
 import pyaudio  # Handles portaudio interface for Python. Allows access to microphone i think
 import wave  # Allows writing of .wav files
 import keyboard  # Read keyboard inputs in dev console. Only used for testing
 import os  # Allows access to files and filepaths
-import Transcriber  # move this shit later. smth smth recursive import
+import Transcriber  # move this later. smth smth recursive import
+from threading import Event
 # see later for function interrupt - https://stackoverflow.com/a/47684708
 
 
@@ -22,7 +22,9 @@ folder = "recordings"
 filedir = os.path.join(os.getcwd(), folder)  # Will save audio into local subdirectory
 clipNo = 0  # Counts how many clips have been recorded so far
 delAmt = 4  # Delete every x files, if savePrevFiles = False
+isRecording = Event()
 
+recpath = ""
 
 def setup():
     # Creating recordings folder if unavailable
@@ -50,7 +52,8 @@ def record(savePrevFiles = False):
 
     # Recording proper
     print("Starting recording...")
-    while True:  # Allows infinite recording until interrupted
+    isRecording.set()
+    while isRecording.is_set():  # Allows infinite recording until interrupted
         for i in range (sampleRate // chunk * seconds):  # Records until x seconds pass
             if i == 0:  # Creating a new wave file. Only runs at beginning of recording every x seconds
                 wf = wave.open(os.path.join(filedir, filename+str(clipNo)+".wav"), 'wb')
@@ -60,12 +63,15 @@ def record(savePrevFiles = False):
                 clipNo += 1
             wf.writeframes(stream.read(chunk))  # Saving of audio input into wav file
 
-            if keyboard.is_pressed("space"):
-                break
+            # Should only be used in console mode
+            """if keyboard.is_pressed("space"):
+                break"""
         
         # Transcriber.start_transcribe(os.path.join(filedir, filename+str(clipNo-1)+".wav"))  # move this crap later
 
-        yield os.path.join(filedir, filename+str(clipNo-1)+".wav")
+        global recpath
+        recpath = os.path.join(filedir, filename+str(clipNo-1)+".wav")
+        print("Recorded", recpath)
 
         # Deleting prev files; leaves one file just to be safe (errors may happen here btw; look into it later)
         if clipNo > 1 and (clipNo-1) % delAmt == 0 and not savePrevFiles:  
@@ -76,8 +82,9 @@ def record(savePrevFiles = False):
                 if rec in todel:
                     os.remove(os.path.join(filedir, rec))
         
-        if keyboard.is_pressed("space"):
-            break
+        # Should only be used in console mode
+        """if keyboard.is_pressed("space"):
+            break"""
     
     print("Stream closed.")
     stream.close()
