@@ -4,7 +4,7 @@ Hello my friends.
 # whisper transcriber software
 run gui.py to see app
 run main.py for console mode (currently nonfunctional)
-<iframe width="560" height="315" src="https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[<img src="https://i.ytimg.com/vi/aAtF-Zzdnc8/hqdefault.jpg" width="50%">](https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN)
 
 ## PATCH NOTES VER 4.1.1 (PYAUDIO VERSION)
 - added multiple active models in Transcriber
