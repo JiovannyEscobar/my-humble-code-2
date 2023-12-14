@@ -3,14 +3,16 @@ Hello my friends.
 
 # whisper transcriber software
 run gui.py to see app
-run main.py for console mode (currently nonfunctional)
+<b>run main.py for console mode (currently nonfunctional)</b>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-## PATCH NOTES VER 4.1.1 (PYAUDIO VERSION)
-- added multiple active models in Transcriber
-- GUI now (partly) functional
-- can change model size and language through GUI
-- can start recording and transcription through GUI
+## PATCH NOTES VER 0.4.2 (PYAUDIO VERSION)
+- GUI temporarily broken
+- fixed issue w/ folder not findable by transcriber
+- new functionality: delete file from transcriber once transcription is finished
+- J.E. GUI fixes
+- now just load one model at a time, solves tensor mismatch error
+- for now, run in console mode
 
 ### ISSUES
 also in [here](https://github.com/JiovannyEscobar/my-humble-code-2/issues)

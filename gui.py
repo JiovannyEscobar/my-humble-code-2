@@ -26,39 +26,26 @@ modelOptions = ["Base", "Tiny", "Small", "Medium", "Large"]
 langOptions = ["English", "Filipino"]
 
 
+def ChangeRunButtonState(toStart: bool, activated: bool):
+    if toStart:
+        if activated:
+            runButton.config(text="Start recording", command=start)
+        else:
+            runButton.config(text="Start recording", command=None)
+    else:
+        if activated:
+            runButton.config(text="Stop recording", command=stop)
+        else:
+            runButton.config(text="Stop recording", command=None)
+
+# CURRENTLY, GUI IS NON-FUNCTIONAL
+
 # RUNNING THE PROCESS
 ongoing = Event()
 def start():
     modelSize = str(selModel.get())
     modelLang = str(selLang.get())
-    print("Recording and transcription called\nModel size:", modelSize, "\nLanguage:", modelLang)
-    
-    if modelLang == "English":
-        modelLang = "en"
-    else:
-        modelLang = ""
-    print(modelLang)
-
-    runThread = Thread(target=running, args=(modelLang.lower(), modelSize.lower(),))
-    runThread.start()
-    
-    runButton.config(text="Stop recording", command=stop)
-
-
-def running(_lang, _size):
-    ongoing.set()
-    StartLiveTranscription(_lang.lower(), _size.lower())
-    while ongoing.is_set():
-        TranscribeSelectedClip(Recorder.recpath)
-        if Transcriber.transcriptIsDone.is_set():
-            try:
-                txtBox.delete("1.0", 'end')
-                txtBox.insert("1.0", *open(Transcriber.transcriptPath).readlines())
-                Transcriber.transcriptIsDone.clear()
-            except:
-                continue
-
-    runButton.config(text="Start recording", command=start)
+    print("Recording and transcription called\n    Model size:", modelSize, "\n    Language:", modelLang)
 
 
 # STOPPING THE PROCESS
@@ -92,7 +79,7 @@ txtFrame.pack(fill="both", expand=True, side='right')
 # OUTPUT BOX
 txtBox = tk.Text(txtFrame, font=(outputFont, outputFontSize), width=40, height=10, bg=outputBoxBg, fg='white')
 txtBox.place(relx=0.1, rely=0.2)
-txtBox.pack()
+txtBox.pack(pady=50)
 
 # PANEL
 label = tk.Label(btnFrame, text="Speech Transcription App", bg=panelBg, fg='white')
@@ -147,17 +134,7 @@ langSelectButton.pack()
 langLabel = tk.Label(btnFrame, text="Transcription language: "+selLang.get(), bg=panelBg, fg='white')
 langLabel.pack(padx=10, pady=14)
 
-# FILE IMPORTING - currently nonfunctional
-def importWav(event):
-    filepath = event.data
-    importLabel.config(text=f"Imported file:\n{filepath}")
-
-
-btnFrame.drop_target_register(DND_FILES)
-btnFrame.dnd_bind('<<Drop>>', importWav)
-
-importLabel = tk.Label(btnFrame, text="Drag files here to import", padx=10, pady=10, bg='white', fg=panelBg)
-importLabel.pack()
-
 
 root.mainloop()
+
+raise SystemExit()

@@ -4,30 +4,46 @@
 import Recorder
 import Transcriber
 from threading import *
+import os
+import keyboard
 
-transcribedFilepaths = []
-isRecordingNew = False
-
-def StartLiveTranscription(_lang, _size):
-    Transcriber.load_model(lang=_lang, size=_size)
-    Recorder.setup()
-
-    t = Thread(target=Recorder.record)
-    t.start()
-
-
-def TranscribeSelectedClip(filepath):
-    if filepath != "" and not filepath in transcribedFilepaths:
-        transcribedFilepaths.append(Recorder.recpath)
-        Transcriber.start_transcribe(Recorder.recpath)
-
-if __name__ == "__main__":
-    Transcriber.load_model()
-    Recorder.setup()
-    function = Recorder.record()
-    while True: 
-        try:
-            Transcriber.start_transcribe(function.__next__())
-        except:
-            break
+running = Event()
     
+if __name__ == "__main__":
+    # don't run this yet
+    Transcriber.load_model(size="small", amt=1)
+    Recorder.setup()
+    Recorder.StartRecord()
+    recpath = os.path.join(os.getcwd(), "recordings")
+
+    while Recorder.keepRecording.is_set():
+        """if Recorder.nextRecIsDone.is_set():
+            try:
+                Transcriber.start_transcribe(Recorder.nextrecpath, waitEachFile=True, deleteFinishedFiles=False, verbose=True)
+                Recorder.nextRecIsDone.clear()
+            except:
+                break
+        if keyboard.is_pressed("space"):
+            Recorder.keepRecording.clear()
+            if Recorder.nextRecIsDone.is_set():
+                try:
+                    Transcriber.start_transcribe(Recorder.nextrecpath, waitEachFile=True, deleteFinishedFiles=False, verbose=True)
+                    Recorder.nextRecIsDone.clear()
+                except:
+                    break"""
+        recs = [x for x in os.listdir(recpath) if ".wav" in x]
+        if keyboard.is_pressed("space"):
+            Recorder.keepRecording.clear()
+        if Transcriber.doneTranscribing.is_set() and len(recs) > 1:
+            i = float('inf')
+            for x in recs:
+                recnum = int("".join([str(y) for y in x if y.isnumeric()]))
+                if recnum < i:
+                    i = recnum
+            
+            print("transcribe", i)
+            try:
+                Transcriber.start_transcribe(os.path.join(os.getcwd(), "recordings", "output"+str(i)+".wav"), verbose=True, waitEachFile=True, deleteFinishedFiles=True)
+            except:
+                break
+

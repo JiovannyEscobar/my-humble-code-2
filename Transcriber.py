@@ -18,7 +18,8 @@ global transcriptPath
 transcriptPath = "transcriptions/"+str(datetime.date.today())+"-"+str(int(time.time()))+".txt"
 global transcriptStartTime
 transcriptStartTime = None
-transcriptIsDone = Event()
+doneTranscribing = Event()
+doneTranscribing.set()
 
 
 def load_model(amt=4, size="small", lang="en"):  # me <3 small.en
@@ -39,14 +40,14 @@ def load_model(amt=4, size="small", lang="en"):  # me <3 small.en
         print("loaded", modelname, "model #", i)
 
 
-def transcribe(filepath, m, verbose=True):
+def transcribe(filepath, m, verbose=True, deleteFinishedFiles=True, waitEachFile=False):
     model = models[m][0]
 
     if verbose:
-        print("Transcribing", filepath, "with model #", m, "to file", transcriptPath)
+        print("Transcribing", filepath, "with model #", m, "to file", transcriptPath) if verbose else None
     try:
         transcription = model.transcribe(filepath)
-        print(filepath, transcription["text"])
+        print(filepath, "  ", transcription["text"])
 
         # Write to file
         with open(transcriptPath, mode="a", encoding="utf-8") as txt:
@@ -55,38 +56,55 @@ def transcribe(filepath, m, verbose=True):
         # print("Error in transcribing", filepath, "; this may be caused by simultaneous transcription, and idk how"
         #       " to fix that issue yet")
         raise RuntimeError
+    if deleteFinishedFiles:
+        os.remove(filepath)  # Delete file once done with transcription
+        print("Deleted finished file", filepath) if verbose else None
+    if waitEachFile:
+        doneTranscribing.set()
     models[m][1] = False
-    # transcriptIsDone.set()
     return
 
 
-def start_transcribe(filepath, waitEachFile = False):  # allows multithreading. note: just realized if waitEachFile = True, this function is worthless
+def start_transcribe(filepath, waitEachFile = False, verbose = False, deleteFinishedFiles=True):  # allows multithreading. note: just realized if waitEachFile = True, this function is worthless
     """Used for multithreading & simultaneous transcription of multiple wav files. Note that Whisper processing multiple
     files is unstable and regularly returns errors. NOTE: waitEachFile = True is highly unstable & should only be used
     for testing"""
     for model in models:
-        if not model[1]:
+        if not model:
             m = models.index(model)
-            model[1] = True
+            model = True
             break
         if models.index(model) == len(models)-1:
-            # currently just warns you and doesn't do anything else
-            print("Models all busy! Transcription cannot be done. Shutting down program...")
+            # currently just warns you and defaults back to m=0
+            # print("Models all busy! Transcription cannot be done. Shutting down program...")
             m = 0
+    if waitEachFile:
+        doneTranscribing.clear()
 
-    t = Thread(target=transcribe, args=(filepath, m, ))
+    t = Thread(target=transcribe, args=(filepath, m, verbose, deleteFinishedFiles, waitEachFile,))
 
     t.start()
-    if waitEachFile:
-        t.join()
 
 
 if __name__ == "__main__":
-    load_model("small")
+    load_model(amt=1, size="small")
 
-    for rec in os.listdir("recordings"):
+    recs = [x for x in os.listdir("recordings") if ".wav" in x]
+    while not recs == []:
+        i = float('inf')
+        for rec in recs:
+            recnum = int("".join([str(x) for x in rec if x.isnumeric()]))
+            if recnum <= i:
+                i = recnum
+    
         tstart = time.time()
-        start_transcribe(os.path.join(os.getcwd(), rec), True)
+        start_transcribe(os.path.join(os.getcwd(), "recordings", "output"+str(i)+".wav"), waitEachFile=False, verbose=True, deleteFinishedFiles=False)
         tstop = time.time()
-        print("Time taken to transcribe", rec, ":", str(tstop-tstart))
+        print("     Time taken to transcribe output"+str(i)+".wav:", str(tstop-tstart))
+        recs.pop(recs.index("output"+str(i)+".wav"))
+    """for rec in os.listdir("recordings"):
+        if ".wav" in rec:
+            tstart = time.time()
+            start_transcribe(os.path.join(os.getcwd(), "recordings", rec), True, verbose=True, deleteFinishedFiles=False)
+            tstop = time.time()"""
 

@@ -40,10 +40,10 @@ def write():
         txt.write("Hello world")
 
 write()"""
-
+"""
 with open("transcriptions/2023-12-03-1701542236.txt") as f:
     lines = f.readlines()
-print(lines)
+print(lines)"""
 
 """# HUGGINGFACE TESTING
 import wave  
@@ -75,3 +75,5 @@ def start_transcribe(filepath, waitEachFile = False):
 
 
 start_transcribe("recordings/output16.wav")"""
+
+print(os.listdir(os.path.join(os.getcwd(), "recordings")))
