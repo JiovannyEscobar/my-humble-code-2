@@ -3,8 +3,8 @@ Hello my friends.
 
 # whisper transcriber software
 run gui.py to see app
-<b>run main.py for console mode (currently nonfunctional)</b>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+run main.py for console mode (currently nonfunctional)
+[<img src="https://i.ytimg.com/vi/aAtF-Zzdnc8/hqdefault.jpg" width="50%">](https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN)
 
 ## PATCH NOTES VER 0.4.2 (PYAUDIO VERSION)
 - GUI temporarily broken
@@ -78,32 +78,31 @@ https://github.com/JohnZolton/scribe
 ## To complete program:
 ### GBS's list
 #### main.py
-- create new file where all functions can be called
-- adjust how input stream & wav writing is done in Recorder
-- find way to return wav filepath from ongoing recorder function
-    - alternatively: break every 3 secs., return filepath, start new function?
-        - will this have gap problem?
-- Transcriber is fine
+~~- create new file where all functions can be called~~
+~~- adjust how input stream & wav writing is done in Recorder~~
+~~- find way to return wav filepath from ongoing recorder function~~
 #### GUI
-- GUI currently not supported by code
-- get this crap workin on d GUI J.E. made
+~~- GUI currently not supported by code~~
+~~- get this crap workin on d GUI J.E. made~~
+- fix issues during live transcribe
+    - not greyed out customization options
+    - closing gui doesn't terminate program
+- stop button doesn't "stop" accurately
+- conditions for stopping and starting
+    - only stop when
+        - models loaded
+        - program setup complete
+    - only start when
+        - prev models deleted
+        - prev transcriptions finished
+        - output box updated to display final transcription
+- fix updating of text box
+    - immediately update only when new transcript is available 
+### Transcriber
+- fix issues where transcript is unavailable until after live transcribe is stopped
 #### language and model choices
-- fili not yet supported; easy fix but i'm lazy
-- allow customization of model size? (J.E.#1)
-#### VAD?
-- voice activity detection
-- if noise/silence is detected,
-    - stop recording until no more silence/noise?
-    - discard current .wav file?
-- why? whisper not very good w/ silences/noises
-#### audio splicing?
-- transcriptions not very accurate sometimes bc of cut speech
-- combine clips? how will this work?
-    - for every clip, combine w/ previous?
-        - then compare transcriptions?
-    - (w/ VAD) if silence is detected, combine all previous clips?
-- is it worth it?
-    - it = sanity
+~~- fili not yet supported; easy fix but i'm lazy~~
+~~- allow customization of model size? (J.E.#1)~~
 #### more functionality?
 - voice commands?
     - maybe look for keyword in transcription hmm....
