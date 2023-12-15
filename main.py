@@ -34,6 +34,22 @@ if __name__ == "__main__":
         recs = [x for x in os.listdir(recpath) if ".wav" in x]
         if keyboard.is_pressed("space"):
             Recorder.keepRecording.clear()
+
+            while recs != []:
+                if Transcriber.doneTranscribing.is_set():
+                    i = float('inf')
+                    for x in recs:
+                        recnum = int("".join([str(y) for y in x if y.isnumeric()]))
+                        if recnum < i:
+                            i = recnum
+                    
+                    print("transcribe", i)
+                    file = "output"+str(i)+".wav"
+                    try:
+                        Transcriber.start_transcribe(os.path.join(os.getcwd(), "recordings", file), verbose=True, waitEachFile=True, deleteFinishedFiles=True)
+                        recs.pop(recs.index(file))
+                    except:
+                        break
         if Transcriber.doneTranscribing.is_set() and len(recs) > 1:
             i = float('inf')
             for x in recs:

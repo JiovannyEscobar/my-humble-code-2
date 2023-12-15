@@ -91,20 +91,21 @@ if __name__ == "__main__":
 
     recs = [x for x in os.listdir("recordings") if ".wav" in x]
     while not recs == []:
-        i = float('inf')
-        for rec in recs:
-            recnum = int("".join([str(x) for x in rec if x.isnumeric()]))
-            if recnum <= i:
-                i = recnum
-    
-        tstart = time.time()
-        start_transcribe(os.path.join(os.getcwd(), "recordings", "output"+str(i)+".wav"), waitEachFile=False, verbose=True, deleteFinishedFiles=False)
-        tstop = time.time()
-        print("     Time taken to transcribe output"+str(i)+".wav:", str(tstop-tstart))
-        recs.pop(recs.index("output"+str(i)+".wav"))
-    """for rec in os.listdir("recordings"):
-        if ".wav" in rec:
+        if doneTranscribing.is_set():
+            i = float('inf')
+            for rec in recs:
+                recnum = int("".join([str(x) for x in rec if x.isnumeric()]))
+                if recnum <= i:
+                    i = recnum
+        
             tstart = time.time()
-            start_transcribe(os.path.join(os.getcwd(), "recordings", rec), True, verbose=True, deleteFinishedFiles=False)
-            tstop = time.time()"""
+            start_transcribe(os.path.join(os.getcwd(), "recordings", "output"+str(i)+".wav"), waitEachFile=True, verbose=True, deleteFinishedFiles=False)
+            tstop = time.time()
+            print("     Time taken to transcribe output"+str(i)+".wav:", str(tstop-tstart))
+            recs.pop(recs.index("output"+str(i)+".wav"))
+        """for rec in os.listdir("recordings"):
+            if ".wav" in rec:
+                tstart = time.time()
+                start_transcribe(os.path.join(os.getcwd(), "recordings", rec), True, verbose=True, deleteFinishedFiles=False)
+                tstop = time.time()"""
 
