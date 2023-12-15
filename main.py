@@ -62,4 +62,5 @@ if __name__ == "__main__":
                 Transcriber.start_transcribe(os.path.join(os.getcwd(), "recordings", "output"+str(i)+".wav"), verbose=True, waitEachFile=True, deleteFinishedFiles=True)
             except:
                 break
+            recs = []
 
