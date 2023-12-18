@@ -31,34 +31,73 @@ def ChangeRunButtonState(toStart: bool, activated: bool):
         if activated:
             runButton.config(text="Start recording", command=start)
         else:
-            runButton.config(text="Start recording", command=None)
+            runButton.config(text="Stopping...", command=None)
     else:
         if activated:
             runButton.config(text="Stop recording", command=stop)
         else:
-            runButton.config(text="Stop recording", command=None)
+            runButton.config(text="Loading...", command=None)
 
-# CURRENTLY, GUI IS NON-FUNCTIONAL
 
 # RUNNING THE PROCESS
 ongoing = Event()
 def start():
+    ChangeRunButtonState(False, False)
     modelSize = str(selModel.get())
     modelLang = str(selLang.get())
     print("Recording and transcription called\n    Model size:", modelSize, "\n    Language:", modelLang)
 
+    modelSize = modelSize.lower()
+    if modelLang == "English":
+        modelLang = "en"
+    else:
+        modelLang = ""
+
+    for child in btnFrame.winfo_children():
+        child.configure(state='disabled')
+
+    StartLiveTranscription(modelSize, modelLang)
+
+    flag = loadingFinished.wait()
+    if flag:
+        ChangeRunButtonState(False, True)
+        for child in btnFrame.winfo_children():
+            if child == runButton:
+                child.configure(state='active')
+        t = Thread(target=UpdateOutputBox)
+        t.start()
+
+
+def StartLiveTranscription(modelSize, modelLang):
+    t = Thread(target=LiveTranscription, args=(modelSize, modelLang,))
+    t.start()
+
+
+def UpdateOutputBox():
+    while running.is_set():
+        try:
+            if Transcriber.doneTranscribing.is_set():
+                with open(Transcriber.transcriptPath, "r") as f:
+                    data = f.readlines()
+                    txtBox.delete("1.0", "end")
+                    txtBox.insert(tk.END, data)
+        except:
+            continue
+    return
+
 
 # STOPPING THE PROCESS
 def stop():
-    ongoing.clear()
-    Recorder.isRecording.clear()
+    Recorder.keepRecording.clear()
+    ChangeRunButtonState(True, False)
     print("GUI called for transcription and recording to stop")
-    try:
-        txtBox.delete("1.0", 'end')
-        txtBox.insert("1.0", *open(Transcriber.transcriptPath).readlines())
-        Transcriber.transcriptIsDone.clear()
-    except:
-        None
+
+    flag = running.wait()
+    if flag:
+        for child in btnFrame.winfo_children():
+            child.configure(state='active')
+        ChangeRunButtonState(True, True)
+    
 
 
 # WINDOW SETUP

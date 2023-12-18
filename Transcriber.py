@@ -11,19 +11,19 @@ import datetime
 
 
 # TRANSCRIPTION DEFAULTS
-global models
-models = []
-_device = "cpu"
 global transcriptPath
 transcriptPath = "transcriptions/"+str(datetime.date.today())+"-"+str(int(time.time()))+".txt"
 global transcriptStartTime
 transcriptStartTime = None
 doneTranscribing = Event()
 doneTranscribing.set()
+model = None  # Contains Whisper model to load
 
 
-def load_model(amt=4, size="small", lang="en"):  # me <3 small.en
-    """HOW TO FIX BATCH MISMATCH ERROR THING? theoretically, load multiple models at once, alternate between"""
+def load_model(size="small", lang="en"):  # me <3 small.en
+    _device = "cpu"
+    global model
+    
     if torch.cuda.is_available():  # Pytorch w/ cuda support is available; uses gpu
         print("Loading Transcribe using GPU...")
         _device = "cuda"
@@ -34,56 +34,41 @@ def load_model(amt=4, size="small", lang="en"):  # me <3 small.en
         lang = "." + lang
     modelname = size+lang
 
-    print("Loading", amt, "model/s of Whisper AI ("+modelname+")")
-    for i in range(amt):
-        models.append([whisper.load_model(modelname, device=_device), False])
-        print("loaded", modelname, "model #", i)
+    print("Loading", modelname, "model of Whisper AI")
+    model = whisper.load_model(modelname, device=_device)
 
 
-def transcribe(filepath, m, verbose=True, deleteFinishedFiles=True, waitEachFile=False):
-    model = models[m][0]
+def transcribe(filepath, waitEachFile=True, deleteFinishedFiles=True, verbose=True):
+    print("Transcribing", filepath, "to file", transcriptPath) if verbose else None
+    transcription = model.transcribe(filepath)
+    print(filepath, "  ", transcription["text"])
 
-    if verbose:
-        print("Transcribing", filepath, "with model #", m, "to file", transcriptPath) if verbose else None
-    try:
-        transcription = model.transcribe(filepath)
-        print(filepath, "  ", transcription["text"])
-
-        # Write to file
-        with open(transcriptPath, mode="a", encoding="utf-8") as txt:
-            txt.write(transcription["text"]+"\n")
-    except:
-        # print("Error in transcribing", filepath, "; this may be caused by simultaneous transcription, and idk how"
-        #       " to fix that issue yet")
-        raise RuntimeError
+    # Write to file
+    with open(transcriptPath, mode="a", encoding="utf-8") as txt:
+        txt.write(transcription["text"]+"\n")
+    
     if deleteFinishedFiles:
         os.remove(filepath)  # Delete file once done with transcription
         print("Deleted finished file", filepath) if verbose else None
     if waitEachFile:
         doneTranscribing.set()
-    models[m][1] = False
     return
 
 
-def start_transcribe(filepath, waitEachFile = False, verbose = False, deleteFinishedFiles=True):  # allows multithreading. note: just realized if waitEachFile = True, this function is worthless
+def start_transcribe(filepath, waitEachFile = True,  deleteFinishedFiles=True, verbose = False):  
+    # allows multithreading. NOTE: may be unstable if waitEachFile is False
     """Used for multithreading & simultaneous transcription of multiple wav files. Note that Whisper processing multiple
     files is unstable and regularly returns errors. NOTE: waitEachFile = True is highly unstable & should only be used
     for testing"""
-    for model in models:
-        if not model:
-            m = models.index(model)
-            model = True
-            break
-        if models.index(model) == len(models)-1:
-            # currently just warns you and defaults back to m=0
-            # print("Models all busy! Transcription cannot be done. Shutting down program...")
-            m = 0
     if waitEachFile:
         doneTranscribing.clear()
 
-    t = Thread(target=transcribe, args=(filepath, m, verbose, deleteFinishedFiles, waitEachFile,))
+    try:
+        t = Thread(target=transcribe, args=(filepath, waitEachFile, deleteFinishedFiles, verbose,))
 
-    t.start()
+        t.start()
+    except:
+        doneTranscribing.set()
 
 
 if __name__ == "__main__":
