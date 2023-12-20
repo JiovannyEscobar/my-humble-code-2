@@ -37,6 +37,9 @@ def load_model(size="small", lang="en"):  # me <3 small.en
     print("Loading", modelname, "model of Whisper AI")
     model = whisper.load_model(modelname, device=_device)
 
+    with open(transcriptPath, mode="w", encoding="utf-8") as txt:
+        txt.write("")
+
 
 def transcribe(filepath, waitEachFile=True, deleteFinishedFiles=True, verbose=True):
     print("Transcribing", filepath, "to file", transcriptPath) if verbose else None

@@ -76,4 +76,9 @@ def start_transcribe(filepath, waitEachFile = False):
 
 start_transcribe("recordings/output16.wav")"""
 
-print(os.listdir(os.path.join(os.getcwd(), "recordings")))
+# print(os.listdir(os.path.join(os.getcwd(), "recordings")))
+
+listy = [1, 2, 3, 4, 5]
+print(listy)
+listy.remove(3)
+print(listy)

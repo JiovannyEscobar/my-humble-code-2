@@ -6,16 +6,14 @@ run gui.py to see app
 run main.py for console mode (currently nonfunctional)
 [<img src="https://i.ytimg.com/vi/aAtF-Zzdnc8/hqdefault.jpg" width="50%">](https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN)
 
-## PATCH NOTES VER 0.4.3.5 (PYAUDIO VERSION)
+## PATCH NOTES VER 0.4.3.6 (PYAUDIO VERSION)
 - GUI reactivated; GUI now (partially) functional
-- GUI greys out customization options when transcription is ongoing
-- now just load one model at a time, solves tensor mismatch error
-- added new directory "archive" for old transcripts (aka hall of shame)
 - issues:
-    - problems outputting in text box
-    - wav files not transcribed after "stop" pressed will not be transcribed
-    - transcription not working properly when start is pressed
+    - flickering text box
+    - multithreading issue in GUI
     - stop not working properly
+    - not automatically scroll down when update
+    - stop button is available during model load
     - TLDR gui is not good working
 
 ### ISSUES
