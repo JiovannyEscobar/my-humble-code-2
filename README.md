@@ -59,32 +59,32 @@ https://github.com/JohnZolton/scribe
 ## To complete program:
 ### GBS's list
 #### main.py
-~~- create new file where all functions can be called~~
-~~- adjust how input stream & wav writing is done in Recorder~~
-~~- find way to return wav filepath from ongoing recorder function~~
+- ~~create new file where all functions can be called~~
+- ~~adjust how input stream & wav writing is done in Recorder~~
+- ~~find way to return wav filepath from ongoing recorder function~~
 #### GUI
-~~- GUI currently not supported by code~~
-~~- get this crap workin on d GUI J.E. made~~
-~~- fix issues during live transcribe~~
-~~    - not greyed out customization options~~
-~~    - closing gui doesn't terminate program~~
-~~- stop button doesn't "stop" accurately~~
-~~- conditions for stopping and starting~~
-~~    - only stop when~~
-~~        - models loaded~~
-~~        - program setup complete~~
-~~    - only start when~~
-~~        - prev models deleted~~
-~~        - prev transcriptions finished~~
-~~        - output box updated to display final transcription~~
-~~- fix updating of text box~~
-~~    - immediately update only when new transcript is available ~~
+- ~~GUI currently not supported by code~~
+- ~~get this crap workin on d GUI J.E. made~~
+- ~~fix issues during live transcribe~~
+    - ~~not greyed out customization options~~
+    - ~~closing gui doesn't terminate program~~
+- ~~stop button doesn't "stop" accurately~~
+- ~~conditions for stopping and starting~~
+    - ~~only stop when~~
+        - ~~models loaded~~
+        - ~~program setup complete~~
+    - ~~only start when~~
+        - ~~prev models deleted~~
+        - ~~prev transcriptions finished~~
+        - ~~output box updated to display final transcription~~
+- ~~fix updating of text box~~
+    - ~~immediately update only when new transcript is available
     - configure adding new lines after each transcription end/start (so that when transcribing again, new transcript is in different line from old transcripts)
 #### Transcriber
-~~- fix issues where transcript is unavailable until after live transcribe is stopped~~
+- ~~fix issues where transcript is unavailable until after live transcribe is stopped~~
 #### language and model choices
-~~- fili not yet supported; easy fix but i'm lazy~~
-~~- allow customization of model size? (J.E.#1)~~
+- ~~fili not yet supported; easy fix but i'm lazy~~
+- ~~allow customization of model size? (J.E.#1)~~
 #### more functionality?
 - voice commands?
     - maybe look for keyword in transcription hmm....
