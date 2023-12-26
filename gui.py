@@ -113,7 +113,7 @@ def stop():
 root = TkinterDnD.Tk()
 root.geometry("900x600")
 root.configure(bg='gray')
-root.title("Whisper AI Transcription")
+root.title("Whisper AI Transcription - v0.5.0")
 
 # FRAMES
 btnFrame = tk.Frame(root)
