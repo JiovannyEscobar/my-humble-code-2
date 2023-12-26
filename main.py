@@ -11,10 +11,12 @@ running = Event()
 loadingFinished = Event()
 done = Event()
 wavFiles = []
+stopCalled = Event()
 
 
 def LiveTranscription(modelsize, modellang, consoleMode=False):
     done.clear()
+    stopCalled.clear()
     running.set()
     loadingFinished.clear()
     
@@ -26,7 +28,7 @@ def LiveTranscription(modelsize, modellang, consoleMode=False):
     while Recorder.keepRecording.is_set():
         recs = [x for x in os.listdir(Recorder.filedir) if ".wav" in x]
 
-        if consoleMode and keyboard.is_pressed("space"):
+        if (consoleMode and keyboard.is_pressed("space")) or stopCalled.is_set():
             Recorder.keepRecording.clear()
             break
 
@@ -51,9 +53,9 @@ def SelectEarliestClip(recs):
         recnum = i if i < recnum else recnum
 
     file = Recorder.filename + str(recnum) + ".wav"
-    t = Thread(target=Transcriber.start_transcribe, args=(os.path.join(Recorder.filedir, file), True, True, False))
-    t.start()
-    """Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), waitEachFile=True)"""
+    """t = Thread(target=Transcriber.start_transcribe, args=(os.path.join(Recorder.filedir, file), True, True, False))
+    t.start()"""
+    Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), waitEachFile=True)
 
 
 def Final():
@@ -79,83 +81,6 @@ def Final():
 
     running.clear()
     done.set()
-
-
-"""def LiveTranscription(modelsize, modellang):
-    running.set()
-    loadingFinished.clear()
-    Transcriber.load_model(size=modelsize, lang=modellang)
-    Recorder.setup()
-    Recorder.StartRecord()
-    loadingFinished.set()
-    
-    while Recorder.keepRecording.is_set():
-        recs = [x for x in os.listdir(Recorder.filedir) if ".wav" in x]
-        if Transcriber.doneTranscribing.is_set() and len(recs) > 1:
-            t = Thread(target=CallTranscribe, args=(recs,))
-            t.start()
-
-    running.clear()
-
-
-def CallTranscribe(recs):
-    i = float('inf')
-    for rec in recs:
-        recnum = int("".join([str(y) for y in rec if y.isnumeric()]))
-        i = recnum if recnum < i else i
-    
-    file = "output"+str(i)+".wav"
-    Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), waitEachFile=True)
-    recs = []
-
-
-def FinalTranscribe():
-    recs = [x for x in os.listdir(Recorder.filedir) if ".wav" in x]
-        
-    print("Pending files:", recs)
-    while not recs == []:
-        recs = []
-        recs = [x for x in os.listdir(Recorder.filedir) if ".wav" in x]
-        if Transcriber.doneTranscribing.is_set():
-            i = float('inf')
-            for rec in recs:
-                recnum = int("".join([str(x) for x in rec if x.isnumeric()]))
-                i = recnum if recnum < i else i
-
-            file = "output"+str(i)+".wav"
-            Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), waitEachFile=True)
-
-
-if __name__ == "__main__":
-    Transcriber.load_model()
-    Recorder.setup()
-    Recorder.StartRecord()
-    
-    while Recorder.keepRecording.is_set():
-        recs = [x for x in os.listdir(Recorder.filedir) if ".wav" in x]
-
-        if keyboard.is_pressed("space"):
-            Recorder.keepRecording.clear()
-            break
-
-        if Transcriber.doneTranscribing.is_set() and len(recs) > 1:
-            i = float('inf')
-            for rec in recs:
-                recnum = int("".join([str(y) for y in rec if y.isnumeric()]))
-                i = recnum if recnum < i else i
-            
-            file = "output"+str(i)+".wav"
-            Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), waitEachFile=True)
-            recs = []
-
-    flag = Transcriber.doneTranscribing.wait()
-
-    if flag:
-        t = Thread(target=FinalTranscribe)
-        t.start()
-
-    print("Live transcribe is done and finished.")"""
-
 
 
 if __name__ == "__main__":

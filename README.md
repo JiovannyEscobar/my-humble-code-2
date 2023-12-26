@@ -2,41 +2,21 @@
 Hello my friends. 
 
 # whisper transcriber software
-run gui.py to see app
-run main.py for console mode (currently nonfunctional)
+run gui.py for app/gui mode
+run main.py for console mode
 [<img src="https://i.ytimg.com/vi/aAtF-Zzdnc8/hqdefault.jpg" width="50%">](https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN)
 
-## PATCH NOTES VER 0.4.3.6 (PYAUDIO VERSION)
-- GUI reactivated; GUI now (partially) functional
-- issues:
-    - flickering text box
-    - multithreading issue in GUI
-    - stop not working properly
-    - not automatically scroll down when update
-    - stop button is available during model load
-    - TLDR gui is not good working
+## PATCH NOTES VER 0.5.0 (GUI UPDATE)
+- GUI now functional
+- outputs real-time
 
 ### ISSUES
 also in [here](https://github.com/JiovannyEscobar/my-humble-code-2/issues)
-- currently can't display transcription in text box
-    - needs to transcribe only when transcription of a file is done, not all the time (for efficiency)
-- there is no fili model actually? just left lang as blank when fili is selected, meaning it may transcribe in other languages?
-- drag&drop not yet implemented; will require a LOT more coding
-    - split drag&dropped audio into 30sec intervals
-    - preprocess intervals (samplerate, audio resolution, etc)
-    - transcribe intervals
-- i feel like code is now spaghetti bc i didnt add events and other stuff
-- doesn't output transcript DURING recording, usually does it AFTER stop recording is pressed now
-    - idk why ????!
-- closing window doesn't stop app
-- stop button automatically stops entire program without final update of output textbox
-- gui needs to update during live transcription
-    - no indicator of model loading
-    - model customization still accessible during live transcription (may result in ![your computer blowing up](https://img.freepik.com/premium-psd/nuclear-bomb-explosion-isolated-transparent-background_879541-787.jpg?w=2000))
-- other stuff i forgot lol
-![me when coding](https://static-00.iconduck.com/assets.00/loudly-crying-face-emoji-1013x1024-xg3rnr6e.png)
+- closing window doesn't stop app (only during live transcription mode tho)
+- not automatically scroll down when update
+- no indication that Whisper is loading (on start) / of transcribing pending audio (on stop)
 
-### V4.0
+### PREV VERS - V4.0
 - recorder basic functionality implemented
 - transcriber basic functionality implemented
 - using pyaudio as audio handling module
@@ -57,17 +37,6 @@ also in [here](https://github.com/JiovannyEscobar/my-humble-code-2/issues)
     - clip cutting speech affects accuracy
 - works
 
-### COMMENTS ON PATCH NOTES VER 4
-
-Great work my friend.
-
-    Let's not do VAD
-    It's fine if it is not accurate, so no need to combine (let's see first how inaccurate actually)
-    Let's not do subtitling function (for now)
-    Let's not do voice commands (Unless you like). Have a button to stop start and stop stuff.
-
-If you have any more questions or need further assistance with anything, feel free to ask. Happy coding!
-
 ## DEPENDENCIES
 ### List
 pls update with any new modules
@@ -76,6 +45,7 @@ pls update with any new modules
 3. Pyaudio
 4. Wave(?)
 5. Tkinterdnd2(?)
+6. keyboard(? only for console mode tho)
 
 ### Installation & Reference code
 You must have Whisper AI working first.
@@ -95,22 +65,23 @@ https://github.com/JohnZolton/scribe
 #### GUI
 ~~- GUI currently not supported by code~~
 ~~- get this crap workin on d GUI J.E. made~~
-- fix issues during live transcribe
-    - not greyed out customization options
-    - closing gui doesn't terminate program
-- stop button doesn't "stop" accurately
-- conditions for stopping and starting
-    - only stop when
-        - models loaded
-        - program setup complete
-    - only start when
-        - prev models deleted
-        - prev transcriptions finished
-        - output box updated to display final transcription
-- fix updating of text box
-    - immediately update only when new transcript is available 
-### Transcriber
-- fix issues where transcript is unavailable until after live transcribe is stopped
+~~- fix issues during live transcribe~~
+~~    - not greyed out customization options~~
+~~    - closing gui doesn't terminate program~~
+~~- stop button doesn't "stop" accurately~~
+~~- conditions for stopping and starting~~
+~~    - only stop when~~
+~~        - models loaded~~
+~~        - program setup complete~~
+~~    - only start when~~
+~~        - prev models deleted~~
+~~        - prev transcriptions finished~~
+~~        - output box updated to display final transcription~~
+~~- fix updating of text box~~
+~~    - immediately update only when new transcript is available ~~
+    - configure adding new lines after each transcription end/start (so that when transcribing again, new transcript is in different line from old transcripts)
+#### Transcriber
+~~- fix issues where transcript is unavailable until after live transcribe is stopped~~
 #### language and model choices
 ~~- fili not yet supported; easy fix but i'm lazy~~
 ~~- allow customization of model size? (J.E.#1)~~
@@ -119,6 +90,8 @@ https://github.com/JohnZolton/scribe
     - maybe look for keyword in transcription hmm....
 - subtitling?
     - might be possible, see .srt file format
+#### App
+- package into executable
 
 -gdc
 
@@ -154,7 +127,3 @@ Porblems/Limitation of program so far:
 -- maybe code is not efficient enough and/or not fast enough hardware  
 
 - J.E.
-
-
-
-

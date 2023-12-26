@@ -1,12 +1,12 @@
 # GUI - Made for the Whisper Transcription Desktop Research
 # Written by Jiovanny Escobar
 
-from main import *
-
 import tkinter as tk
 
+from main import *
 from threading import Thread, Event
 from tkinterdnd2 import TkinterDnD, DND_FILES
+
 
 m = 0
 
@@ -22,8 +22,92 @@ outputFont = 'Calibri'
 outputFontSize = 14
 
 # OTHER
-modelOptions = ["Base", "Tiny", "Small", "Medium", "Large"]
+modelOptions = ["Base", "Tiny", "Small", "Medium", "Large", "Large (v2)", "Large (v3)"]
 langOptions = ["English", "Filipino"]
+
+# PROCESS FUNCTIONS
+def ChangePanelState(toStart: bool, activated: bool):
+    if toStart:
+        if activated:
+            runButton.config(text="Start recording", command=start)
+            for child in btnFrame.winfo_children():
+                child.configure(state='active')
+        else:
+            runButton.config(text="Stopping...", command=None)
+            runButton.configure(state='disabled')
+    else:
+        if activated:
+            runButton.config(text="Stop recording", command=stop)
+            runButton.configure(state='active')
+        else:
+            runButton.config(text="Loading...", command=None)
+            for child in btnFrame.winfo_children():
+                child.configure(state='disabled')
+
+
+def start():
+    ChangePanelState(False, False)
+
+    if selLang.get() == "English":
+        selLangStr = "en"
+    else:
+        selLangStr = ""
+    if selModel.get() == "Large":
+        selModelStr = "large"
+        selLangStr = ""
+    elif selModel.get() == "Large (v2)":
+        selModelStr = "large-v2"
+        selLangStr = ""
+    elif selModel.get() == "Large (v3)":
+        selModelStr = "large-v3"
+        selLangStr = ""
+    else:
+        selModelStr = selModel.get().lower()
+
+    t = Thread(target=LiveTranscription, args=(selModelStr, selLangStr, False))
+    t.start()
+
+    flag = loadingFinished.wait()
+    if flag:
+        ChangePanelState(False,True)
+        statusLabel.configure(text="Recording and transcribing...")
+    t = Thread(target=ongoing)
+    t.start()
+
+
+def ongoing():
+    linesDone = 0
+    while True:
+        with open(Transcriber.transcriptPath, "r") as txt:
+            transcriptList = txt.readlines()
+            lines = len(transcriptList)
+            for x in range(lines):
+                transcriptList[x] = transcriptList[x].strip()
+        
+        if not lines == linesDone:
+            txtBox.insert("1.0 lineend", transcriptList[lines-1] + " ")
+            linesDone = lines
+
+        if done.is_set():
+            with open(Transcriber.transcriptPath, "r") as txt:
+                final = txt.readlines()
+            for x in range(linesDone, len(final)):
+                txtBox.insert("1.0 lineend", final[x]+" ")
+            break
+    return
+
+
+def stop():
+    statusLabel.configure(text="Stopping app; transcribing pending audio files. Please do not exit the app!")
+    ChangePanelState(True, False)
+
+    stopCalled.set()
+    flag = done.wait()
+    if flag:
+        statusLabel.configure(text="Done! Ready for next use")
+        ChangePanelState(True, True)
+    return
+
 
 # WINDOW SETUP
 root = TkinterDnD.Tk()
@@ -50,59 +134,38 @@ label = tk.Label(btnFrame, text="Speech Transcription App", bg=panelBg, fg='whit
 label.pack(pady=12, padx=100)
 label.config()
 
-runButton = tk.Button(btnFrame, text="Start microphone", command=None, bg=panelBg, fg="white")
+statusLabel = tk.Label(btnFrame, text="Welcome! Please enjoy", bg=panelBg, fg='white')
+statusLabel.pack(pady=12, padx=100)
+statusLabel.config()
+
+runButton = tk.Button(btnFrame, text="Start microphone", command=start, bg=panelBg, fg="white")
 runButton.pack(padx=10, pady=12)
-
-# future fix: change run button to stop button once input starts
-
-# OUTPUTTING
-def updateModel():
-    updatemsg = "Model selected: "+selModel.get()
-    print(updatemsg)
-    modelLabel.config(text=updatemsg)
-
-
-def updateLang():
-    updatemsg = "Language selected: "+selLang.get()
-    print(updatemsg)
-    langLabel.config(text=updatemsg)
-
 
 # MODEL SELECTION
 selModel = tk.StringVar()
 selModel.set("Small")
+
+modelLabel = tk.Label(btnFrame, text="Model Size", bg=panelBg, fg="white")
+modelLabel.pack(padx=10, pady=14)
 
 modelDropdown = tk.OptionMenu(btnFrame, selModel, *modelOptions)
 modelDropdown.config(bg=panelBg, fg="white")
 modelDropdown["menu"].config(bg=panelBg, fg="white")
 modelDropdown.pack()
 
-modelSelectButton = tk.Button(btnFrame, text="Set Model", command=updateModel, bg=panelBg, fg='white')
-modelSelectButton.pack()
-
-modelLabel = tk.Label(btnFrame, text="Model selected: "+selModel.get(), bg=panelBg, fg="white")
-modelLabel.pack(padx=10, pady=14)
-
 # LANGUAGE SELECTION
 selLang = tk.StringVar()
 selLang.set(langOptions[0])
+
+langLabel = tk.Label(btnFrame, text="Language", bg=panelBg, fg='white')
+langLabel.pack(padx=10, pady=14)
 
 langDropdown = tk.OptionMenu(btnFrame, selLang, *langOptions)
 langDropdown.config(bg=panelBg, fg='white')
 langDropdown["menu"].config(bg=panelBg, fg='white')
 langDropdown.pack()
 
-langSelectButton = tk.Button(btnFrame, text="Set Language", command=updateLang, bg=panelBg, fg='white')
-langSelectButton.pack()
-
-langLabel = tk.Label(btnFrame, text="Transcription language: "+selLang.get(), bg=panelBg, fg='white')
-langLabel.pack(padx=10, pady=14)
-
-
-# CODES!
-
-
-
 root.mainloop()
 
+# ONLY RUNS AFTER WINDOW CLOSE!
 raise SystemExit()

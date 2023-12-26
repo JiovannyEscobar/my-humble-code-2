@@ -1,0 +1,7 @@
+ testing whisper testing hello
+ Hello, hello.
+ uh hello
+ transcribe and put in the text box.
+ Thank you very much.
+ Okay, done.
+

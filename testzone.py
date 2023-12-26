@@ -78,7 +78,13 @@ start_transcribe("recordings/output16.wav")"""
 
 # print(os.listdir(os.path.join(os.getcwd(), "recordings")))
 
-listy = [1, 2, 3, 4, 5]
+"""listy = [1, 2, 3, 4, 5]
 print(listy)
 listy.remove(3)
-print(listy)
+print(listy)"""
+
+with open("transcriptions/2023-12-26-1703571023.txt", mode='r') as txt:
+    txtList = txt.readlines()
+    for x  in range(len(txtList)):
+        txtList[x] = txtList[x].strip()
+    print(txtList)

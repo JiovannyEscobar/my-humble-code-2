@@ -12,7 +12,7 @@ import datetime
 
 # TRANSCRIPTION DEFAULTS
 global transcriptPath
-transcriptPath = "transcriptions/"+str(datetime.date.today())+"-"+str(int(time.time()))+".txt"
+transcriptPath = "transcriptions/tr-"+str(datetime.date.today())+"-"+str(int(time.time()))+".txt"
 global transcriptStartTime
 transcriptStartTime = None
 doneTranscribing = Event()
@@ -43,7 +43,11 @@ def load_model(size="small", lang="en"):  # me <3 small.en
 
 def transcribe(filepath, waitEachFile=True, deleteFinishedFiles=True, verbose=True):
     print("Transcribing", filepath, "to file", transcriptPath) if verbose else None
-    transcription = model.transcribe(filepath)
+    try:
+        transcription = model.transcribe(filepath)
+    except:
+        print("Error transcribing", filepath)
+        return
     print(filepath, "  ", transcription["text"])
 
     # Write to file
@@ -51,8 +55,11 @@ def transcribe(filepath, waitEachFile=True, deleteFinishedFiles=True, verbose=Tr
         txt.write(transcription["text"]+"\n")
     
     if deleteFinishedFiles:
-        os.remove(filepath)  # Delete file once done with transcription
-        print("Deleted finished file", filepath) if verbose else None
+        try:
+            os.remove(filepath)  # Delete file once done with transcription
+            print("Deleted finished file", filepath) if verbose else None
+        except:
+            print("Error deleting", filepath)
     if waitEachFile:
         doneTranscribing.set()
     return
