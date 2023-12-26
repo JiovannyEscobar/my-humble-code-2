@@ -78,7 +78,7 @@ https://github.com/JohnZolton/scribe
         - ~~prev transcriptions finished~~
         - ~~output box updated to display final transcription~~
 - ~~fix updating of text box~~
-    - ~~immediately update only when new transcript is available
+    - ~~immediately update only when new transcript is available~~
     - configure adding new lines after each transcription end/start (so that when transcribing again, new transcript is in different line from old transcripts)
 #### Transcriber
 - ~~fix issues where transcript is unavailable until after live transcribe is stopped~~
