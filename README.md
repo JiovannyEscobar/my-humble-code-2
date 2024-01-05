@@ -6,15 +6,17 @@ run gui.py for app/gui mode
 run main.py for console mode
 [<img src="https://i.ytimg.com/vi/aAtF-Zzdnc8/hqdefault.jpg" width="50%">](https://www.youtube.com/embed/aAtF-Zzdnc8?si=Y2RkNxhsbKnsCPrN)
 
-## PATCH NOTES VER 0.5.0 (GUI UPDATE)
+## PATCH NOTES VER 0.5.1 (GUI UPDATE)
 - GUI now functional
 - outputs real-time
+- terminates all processes on unexpected app close
+- status label for user convenience
+- indicates that Whisper is loading (on start) / transcribing pending audio (on stop)
+- automatically scrolls down
 
 ### ISSUES
 also in [here](https://github.com/JiovannyEscobar/my-humble-code-2/issues)
-- closing window doesn't stop app (only during live transcription mode tho)
-- not automatically scroll down when update
-- no indication that Whisper is loading (on start) / of transcribing pending audio (on stop)
+- no Filipino-specific transcription
 
 ### PREV VERS - V4.0
 - recorder basic functionality implemented

@@ -16,7 +16,7 @@ sampleFormat = pyaudio.paInt16  # Recording format for audio
 channels = 1  # Audio channels. 1 is mono, 2 is stereo. 1 is easier/more compatible w/ Whisper i think
 sampleRate = 16000  # Audio sample rate. x bits per sec (i think)
 seconds = 3  # How many seconds per audio clip
-filename = "output"  # Will save audio into "filename" + n + ".wav"
+filename = "rec-"  # Will save audio into "filename" + n + ".wav"
 folder = "recordings"
 filedir = os.path.join(os.getcwd(), folder)  # Will save audio into local subdirectory
 clipNo = 0  # Counts how many clips have been recorded so far. Always starts at one less than the next file to be recorded
@@ -44,7 +44,7 @@ def setup(deletePreviousAudio=True):
 
 
 def StartRecord(verbose=False):
-    t = Thread(target=record, args=(verbose, ))
+    t = Thread(target=record, args=(verbose, ), daemon=True)
     print("Starting record thread...")
     keepRecording.set()
     t.start()

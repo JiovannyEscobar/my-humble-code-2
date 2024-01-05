@@ -2,10 +2,12 @@
 # Written by Jiovanny Escobar
 
 import tkinter as tk
+from tkinter import messagebox
 
 from main import *
 from threading import Thread, Event
-from tkinterdnd2 import TkinterDnD, DND_FILES
+
+windowRunning = Event()
 
 
 m = 0
@@ -47,6 +49,7 @@ def ChangePanelState(toStart: bool, activated: bool):
 
 def start():
     ChangePanelState(False, False)
+    statusLabel.configure(text="Loading model...")
 
     if selLang.get() == "English":
         selLangStr = "en"
@@ -54,24 +57,32 @@ def start():
         selLangStr = ""
     if selModel.get() == "Large":
         selModelStr = "large"
-        selLangStr = ""
     elif selModel.get() == "Large (v2)":
         selModelStr = "large-v2"
-        selLangStr = ""
     elif selModel.get() == "Large (v3)":
         selModelStr = "large-v3"
-        selLangStr = ""
     else:
         selModelStr = selModel.get().lower()
+    
+    if not Transcriber.IsModelLoaded(selModelStr, selLangStr):
+        prompt = messagebox.askokcancel(title="Model not downloaded", message="Selected model " + selModelStr + " " \
+                                           + selLangStr + "not found locally. Will now download model (requires a strong"+\
+                                            " internet connection). Proceed?")
+        if not prompt:
+            ChangePanelState(True, True)
+            statusLabel.configure(text="Transcription cancelled due to missing model. Ready for use")
+            return
+        statusLabel.configure(text="Downloading "+selModelStr+" "+selLangStr+" model. This might take a while")
 
-    t = Thread(target=LiveTranscription, args=(selModelStr, selLangStr, False))
+    root.update()
+    t = Thread(target=LiveTranscription, args=(selModelStr, selLangStr, False), daemon=True)
     t.start()
 
     flag = loadingFinished.wait()
     if flag:
         ChangePanelState(False,True)
         statusLabel.configure(text="Recording and transcribing...")
-    t = Thread(target=ongoing)
+    t = Thread(target=ongoing, daemon=True)
     t.start()
 
 
@@ -85,14 +96,16 @@ def ongoing():
                 transcriptList[x] = transcriptList[x].strip()
         
         if not lines == linesDone:
-            txtBox.insert("1.0 lineend", transcriptList[lines-1] + " ")
+            txtBox.insert("end", transcriptList[lines-1] + "\n")
             linesDone = lines
+            txtBox.see("end")
 
         if done.is_set():
             with open(Transcriber.transcriptPath, "r") as txt:
                 final = txt.readlines()
             for x in range(linesDone, len(final)):
-                txtBox.insert("1.0 lineend", final[x]+" ")
+                txtBox.insert("end", final[x]+"\n")
+                txtBox.see("end")
             break
     return
 
@@ -100,6 +113,7 @@ def ongoing():
 def stop():
     statusLabel.configure(text="Stopping app; transcribing pending audio files. Please do not exit the app!")
     ChangePanelState(True, False)
+    root.update()
 
     stopCalled.set()
     flag = done.wait()
@@ -110,10 +124,10 @@ def stop():
 
 
 # WINDOW SETUP
-root = TkinterDnD.Tk()
+root = tk.Tk()
 root.geometry("900x600")
 root.configure(bg='gray')
-root.title("Whisper AI Transcription - v0.5.0")
+root.title("Whisper AI Transcription - v0.5.1")
 
 # FRAMES
 btnFrame = tk.Frame(root)
@@ -134,10 +148,6 @@ label = tk.Label(btnFrame, text="Speech Transcription App", bg=panelBg, fg='whit
 label.pack(pady=12, padx=100)
 label.config()
 
-statusLabel = tk.Label(btnFrame, text="Welcome! Please enjoy", bg=panelBg, fg='white')
-statusLabel.pack(pady=12, padx=100)
-statusLabel.config()
-
 runButton = tk.Button(btnFrame, text="Start microphone", command=start, bg=panelBg, fg="white")
 runButton.pack(padx=10, pady=12)
 
@@ -153,6 +163,10 @@ modelDropdown.config(bg=panelBg, fg="white")
 modelDropdown["menu"].config(bg=panelBg, fg="white")
 modelDropdown.pack()
 
+def CheckModelUpdate(*args):
+    print("Selected model:", selModel.get())
+selModel.trace_add('write', CheckModelUpdate)
+
 # LANGUAGE SELECTION
 selLang = tk.StringVar()
 selLang.set(langOptions[0])
@@ -165,7 +179,14 @@ langDropdown.config(bg=panelBg, fg='white')
 langDropdown["menu"].config(bg=panelBg, fg='white')
 langDropdown.pack()
 
+# STATUS LABEL
+statusLabel = tk.Label(btnFrame, text="Welcome! Please enjoy", wraplength=150, justify="center", bg=panelBg, fg='white')
+statusLabel.pack(pady=50, padx=100)
+statusLabel.config()
+
 root.mainloop()
+if not done.is_set():
+    print("Unexpected close!")
 
 # ONLY RUNS AFTER WINDOW CLOSE!
 raise SystemExit()

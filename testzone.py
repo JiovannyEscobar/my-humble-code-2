@@ -5,6 +5,11 @@ from faster_whisper import WhisperModel
 from threading import Thread
 import datetime
 import time
+import langid
+import translate
+import whisper
+import tkinter
+from tkinter import messagebox
 
 def convwavtoarr(filepath):
     wav = wave.open("recordings/output16.wav")
@@ -83,8 +88,45 @@ print(listy)
 listy.remove(3)
 print(listy)"""
 
-with open("transcriptions/2023-12-26-1703571023.txt", mode='r') as txt:
+"""with open("transcriptions/2023-12-26-1703571023.txt", mode='r') as txt:
     txtList = txt.readlines()
     for x  in range(len(txtList)):
         txtList[x] = txtList[x].strip()
-    print(txtList)
+    print(txtList)"""
+
+"""lang, _ = langid.classify("Hello world!")"""
+translator = translate.Translator(to_lang="fil")
+"""translation = translator.translate("Hello world!")
+print(lang)
+print(translation)"""
+
+model = whisper.load_model("large")
+for file in os.listdir("recordings"):
+    if ".wav" in file:
+        transcript = model.transcribe("recordings/"+file)
+        print(transcript["text"])
+        ttranscript = model.transcribe("recordings/"+file, language="tagalog")
+        print(ttranscript["text"])
+
+
+"""def IsModelLoaded(size, lang):
+    modelsPath = os.path.join(os.path.expanduser("~"), ".cache", "whisper")
+    if lang == "en":
+        lang = "."+lang
+    else:
+        lang = ""
+    if size+lang+".pt" in os.listdir(modelsPath):
+        print("Model is downloaded locally")
+        return True
+    else:
+        print("Model is not downloaded locally")
+        return False
+print(IsModelLoaded("large", ""))
+
+root = tkinter.Tk()
+box = messagebox.askokcancel(title="Model not downloaded", message="Model not found locally. Will now download missing model (requires internet connection). Continue?")
+if box:
+    print(True)
+else:
+    print(False)
+root.mainloop()"""

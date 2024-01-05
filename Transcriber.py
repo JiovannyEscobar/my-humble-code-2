@@ -8,6 +8,7 @@ import torch
 import os
 import time
 import datetime
+import langdetect
 
 
 # TRANSCRIPTION DEFAULTS
@@ -18,11 +19,13 @@ transcriptStartTime = None
 doneTranscribing = Event()
 doneTranscribing.set()
 model = None  # Contains Whisper model to load
+usedLang = ""
+langdetect.DetectorFactory.seed = 0
 
 
 def load_model(size="small", lang="en"):  # me <3 small.en
     _device = "cpu"
-    global model
+    global model, usedLang
     
     if torch.cuda.is_available():  # Pytorch w/ cuda support is available; uses gpu
         print("Loading Transcribe using GPU...")
@@ -31,22 +34,53 @@ def load_model(size="small", lang="en"):  # me <3 small.en
         print("Loading Transcribe using CPU...")
 
     if lang != "":
+        usedLang = "english"  # Hardcoded: language in English (en)
         lang = "." + lang
+    else:
+        usedLang = "tagalog"  # Hardcoded: all other langs are filipino
     modelname = size+lang
 
     print("Loading", modelname, "model of Whisper AI")
     model = whisper.load_model(modelname, device=_device)
 
+
     with open(transcriptPath, mode="w", encoding="utf-8") as txt:
         txt.write("")
 
 
-def transcribe(filepath, waitEachFile=True, deleteFinishedFiles=True, verbose=True):
-    print("Transcribing", filepath, "to file", transcriptPath) if verbose else None
+def IsModelLoaded(size, lang):
+    modelsPath = os.path.join(os.path.expanduser("~"), ".cache", "whisper")
+    if lang == "en":
+        lang = "."+lang
+    else:
+        lang = ""
+    if size+lang+".pt" in os.listdir(modelsPath):
+        print("Model is downloaded locally")
+        return True
+    else:
+        print("Model is not downloaded locally")
+        return False
+
+
+def transcribe(filepath, deleteFinishedFiles=True, verbose=True):
+    global usedLang
+    print("Transcribing", filepath, "to file", transcriptPath, "in lang", usedLang) if verbose else None
     try:
-        transcription = model.transcribe(filepath)
+        transcription = model.transcribe(filepath, language=usedLang)
+
+        """try:
+            if not usedLang == "en":
+                detLang = langdetect.detect(transcription["text"])
+                print("    Language:", detLang)
+                if not detLang == "tl":
+                    print("     Not in selected language. Skip")
+                    doneTranscribing.set()
+                    return
+        except:
+            print("    Error detecting language")"""
     except:
         print("Error transcribing", filepath)
+        doneTranscribing.set()
         return
     print(filepath, "  ", transcription["text"])
 
@@ -60,21 +94,19 @@ def transcribe(filepath, waitEachFile=True, deleteFinishedFiles=True, verbose=Tr
             print("Deleted finished file", filepath) if verbose else None
         except:
             print("Error deleting", filepath)
-    if waitEachFile:
-        doneTranscribing.set()
+    doneTranscribing.set()
     return
 
 
-def start_transcribe(filepath, waitEachFile = True,  deleteFinishedFiles=True, verbose = False):  
+def start_transcribe(filepath,  deleteFinishedFiles=True, verbose = False):  
     # allows multithreading. NOTE: may be unstable if waitEachFile is False
     """Used for multithreading & simultaneous transcription of multiple wav files. Note that Whisper processing multiple
     files is unstable and regularly returns errors. NOTE: waitEachFile = True is highly unstable & should only be used
     for testing"""
-    if waitEachFile:
-        doneTranscribing.clear()
+    doneTranscribing.clear()
 
     try:
-        t = Thread(target=transcribe, args=(filepath, waitEachFile, deleteFinishedFiles, verbose,))
+        t = Thread(target=transcribe, args=(filepath, deleteFinishedFiles, verbose,), daemon=True)
 
         t.start()
     except:
@@ -82,7 +114,7 @@ def start_transcribe(filepath, waitEachFile = True,  deleteFinishedFiles=True, v
 
 
 if __name__ == "__main__":
-    load_model(amt=1, size="small")
+    load_model(size="small", lang="en")
 
     recs = [x for x in os.listdir("recordings") if ".wav" in x]
     while not recs == []:
@@ -93,11 +125,9 @@ if __name__ == "__main__":
                 if recnum <= i:
                     i = recnum
         
-            tstart = time.time()
-            start_transcribe(os.path.join(os.getcwd(), "recordings", "output"+str(i)+".wav"), waitEachFile=True, verbose=True, deleteFinishedFiles=False)
-            tstop = time.time()
-            print("     Time taken to transcribe output"+str(i)+".wav:", str(tstop-tstart))
-            recs.pop(recs.index("output"+str(i)+".wav"))
+            start_transcribe(os.path.join(os.getcwd(), "recordings", "rec-"+str(i)+".wav"), verbose=True, deleteFinishedFiles=False)
+            recs.pop(recs.index("rec-"+str(i)+".wav"))
+            doneTranscribing.wait()
         """for rec in os.listdir("recordings"):
             if ".wav" in rec:
                 tstart = time.time()

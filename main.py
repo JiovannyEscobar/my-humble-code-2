@@ -10,6 +10,7 @@ import keyboard
 running = Event()
 loadingFinished = Event()
 done = Event()
+done.set()
 wavFiles = []
 stopCalled = Event()
 
@@ -36,14 +37,13 @@ def LiveTranscription(modelsize, modellang, consoleMode=False):
             recs = []
             recs = [x for x in os.listdir(Recorder.filedir) if ".wav" in x]
             # Selecting earliest clip
-            """t = Thread(target=SelectEarliestClip, args=(recs,))
-            t.start()"""
             SelectEarliestClip(recs)
         recs = []
 
     # Live transcription is stopped
-    t = Thread(target=Final)
-    t.start()
+    """t = Thread(target=Final)
+    t.start()"""
+    Final()
 
 
 def SelectEarliestClip(recs):
@@ -53,9 +53,7 @@ def SelectEarliestClip(recs):
         recnum = i if i < recnum else recnum
 
     file = Recorder.filename + str(recnum) + ".wav"
-    """t = Thread(target=Transcriber.start_transcribe, args=(os.path.join(Recorder.filedir, file), True, True, False))
-    t.start()"""
-    Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), waitEachFile=True)
+    Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), verbose=True)
 
 
 def Final():
@@ -75,7 +73,7 @@ def Final():
                 break
             file = Recorder.filename + str(recnum) + ".wav"
             try:
-                Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), waitEachFile=True)
+                Transcriber.start_transcribe(os.path.join(Recorder.filedir, file), verbose=True)
             except:
                 continue
 
@@ -84,6 +82,6 @@ def Final():
 
 
 if __name__ == "__main__":
-    t = Thread(target=LiveTranscription, args=("small", "en", True))
+    t = Thread(target=LiveTranscription, args=("large", "", True))
     t.start()
 
